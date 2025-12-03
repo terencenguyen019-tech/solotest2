@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHADOW SYSTEM - WEEKLY</title>
+    <title>SHADOW SYSTEM - TIME TRAVEL</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001f3f">
@@ -55,11 +55,9 @@
         .rank-display { text-align: center; padding: 15px; background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.1); }
         .rank-text { font-size: 1.5rem; color: var(--warning); font-weight: bold; text-shadow: 0 0 10px var(--warning); }
         
-        /* ĐỒNG HỒ MỚI */
-        .clock-display { 
-            font-family: 'Oswald', sans-serif; color: var(--aura-glow); font-size: 1rem; margin-top: 5px; 
-            letter-spacing: 1px; text-transform: uppercase;
-        }
+        /* ĐỒNG HỒ */
+        .clock-display { font-family: monospace; color: #888; font-size: 0.9rem; margin-top: 5px; }
+        .sim-tag { background: var(--danger); color: #000; padding: 2px 5px; border-radius: 3px; font-weight: bold; font-size: 0.7rem; display:none; }
 
         .content { padding: 15px; max-height: 70vh; overflow-y: auto; }
 
@@ -101,7 +99,12 @@
             background: #111; border: 1px solid #555; color: #fff; padding: 8px; width: 100%; text-align: center; border-radius: 4px; font-size: 16px;
         }
         .bmi-input:disabled { background: #222; color: #666; border-color: #333; }
-        .calc-btn { width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 10px; font-weight: bold; margin-top: 5px; }
+        
+        .calc-btn {
+            width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 10px; font-weight: bold; margin-top: 5px;
+        }
+        .calc-btn:disabled { background: #333; color: #666; }
+        
         .bmi-result-area { border-top: 1px dashed #444; padding-top: 10px; margin-top: 5px; display: none; }
         .analysis-text { font-size: 0.95rem; color: #e0e6ff; line-height: 1.5; margin-bottom: 5px; }
         .hl { color: var(--warning); font-weight: bold; }
@@ -126,7 +129,15 @@
         .loading-spinner { border: 4px solid #333; border-top: 4px solid var(--aura-glow); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* REWARDS & HISTORY */
+        /* NEXT DAY BUTTON */
+        .next-day-btn {
+            width: 100%; margin-top: 30px; padding: 15px; font-size: 1rem;
+            background: #000; border: 2px solid var(--danger); color: var(--danger);
+            font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .next-day-btn:active { background: var(--danger); color: #000; }
+
         .reward-box { border: 1px solid #555; padding: 20px; margin: 20px 0; background: rgba(255,255,255,0.05); border-radius: 8px;}
         .milestone-text { color: var(--warning); font-size: 1.6rem; text-transform: uppercase; text-shadow: 0 0 15px var(--warning); font-weight: bold; }
         .daily-text { color: var(--aura-glow); font-size: 1.3rem; font-weight: bold; }
@@ -137,15 +148,6 @@
         .history-day { color: var(--warning); font-weight: bold; font-size: 0.9rem; }
         .history-reward { color: #fff; }
 
-        .next-day-btn {
-            width: 100%; margin-top: 30px; padding: 15px; font-size: 1rem;
-            background: #000; border: 2px solid var(--danger); color: var(--danger);
-            font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .next-day-btn:active { background: var(--danger); color: #000; }
-
-        /* LỊCH TRÌNH */
         .schedule-info { color: var(--aura-glow); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
         .rest-day-text { color: #666; font-style: italic; padding: 10px; text-align: center; border: 1px dashed #444; border-radius: 5px;}
 
@@ -156,7 +158,10 @@
 <div class="system-window">
     <div class="header">
         <h1 class="quest-title">SHADOW SYSTEM</h1>
-        <div class="clock-display" id="real-time-clock">Loading Time...</div>
+        <div class="clock-display">
+            <span id="real-time-clock">Loading...</span>
+            <span id="sim-indicator" class="sim-tag">HACK THỜI GIAN</span>
+        </div>
     </div>
 
     <div class="rank-display">
@@ -216,7 +221,7 @@
                         <input type="number" id="target-bmi-input" class="bmi-input" placeholder="VD: 22">
                     </div>
                 </div>
-                <button id="btn-calc-bmi" class="calc-btn" onclick="calculateBMI()">TÍNH TOÁN VÀ LƯU</button>
+                <button id="btn-calc-bmi" class="calc-btn" onclick="calculateBMI()">TÍNH TOÁN & LƯU</button>
                 <div id="bmi-result-area" class="bmi-result-area">
                     <div class="analysis-text">BMI Hiện tại: <span id="bmi-val" class="hl">--</span> (<span id="bmi-status">--</span>)</div>
                     <div id="bmi-comparison" class="analysis-text" style="font-style:italic; color:#aaa; margin-bottom:8px;"></div>
@@ -257,7 +262,8 @@
         <div class="task-item"><span>Học Tiếng Nhật</span> <button id="btn-jp" onclick="toggleTask('jp')">THỰC HIỆN</button></div>
         <div class="task-item"><span>Học Phổ Thông</span> <button id="btn-school" onclick="toggleTask('school')">THỰC HIỆN</button></div>
 
-        <button class="next-day-btn" onclick="forceNextDay()">>> QUA NGÀY MỚI >></button>
+        <button class="next-day-btn" onclick="forceNextDay()">>> HACK: QUA NGÀY TIẾP THEO >></button>
+        <div style="text-align:center; font-size:0.8rem; color:#666; margin-top:5px;">(Bấm để tua thời gian - Dùng để Test Lịch & BMI)</div>
     </div>
 </div>
 
@@ -307,81 +313,79 @@
     ];
 
     // --- DATA ---
-    let data = JSON.parse(localStorage.getItem('shadowV10_Weekly')) || {
+    let data = JSON.parse(localStorage.getItem('shadowV11_TimeTravel')) || {
         day: 1, water: 0, milk: 0, supp: 0, tasks: {}, gymDone: false, 
         lastDate: new Date().toDateString(),
         rewardClaimed: false, history: [],
-        height: '', weightHistory: [], targetBMI: '', apiKey: ''
+        height: '', weightHistory: [], targetBMI: '', apiKey: '',
+        offsetDays: 0 // Biến Hack Thời Gian
     };
 
     function init() {
-        checkAutoNewDay();
         renderUI();
-        updateScheduleUI(); // Cập nhật lịch theo thứ
         loadBMIState();
         initAI();
         
         setInterval(() => {
-            const now = new Date();
+            const now = getEffectiveDate();
             // Format thứ/ngày/tháng/năm
             const options = { weekday: 'long', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
             document.getElementById('real-time-clock').innerText = now.toLocaleDateString('vi-VN', options);
             
-            if(now.getSeconds() === 0 && now.getHours() === 0 && now.getMinutes() === 0) checkAutoNewDay(); 
+            // Hiển thị trạng thái Hack
+            if(data.offsetDays > 0) {
+                document.getElementById('sim-indicator').style.display = 'inline-block';
+                document.getElementById('sim-indicator').innerText = `+${data.offsetDays} NGÀY`;
+            }
         }, 1000);
     }
 
-    // --- SCHEDULE LOGIC (NEW) ---
+    // --- TIME TRAVEL LOGIC ---
+    function getEffectiveDate() {
+        const d = new Date();
+        d.setDate(d.getDate() + (data.offsetDays || 0));
+        return d;
+    }
+
     function updateScheduleUI() {
-        const day = new Date().getDay(); // 0=CN, 1=T2, ... 6=T7
+        const day = getEffectiveDate().getDay(); // Dùng ngày giả lập để tính Thứ
         
         const gymBlock = document.getElementById('gym-block');
         const sprintBlock = document.getElementById('sprint-block');
+        const restMsg = document.getElementById('rest-msg');
         
-        // Gym: T2, T3, T4, T6, T7 (1,2,3,5,6)
+        // T2,3,4,6,7 (1,2,3,5,6)
         if ([1,2,3,5,6].includes(day)) {
             gymBlock.style.display = 'block';
             sprintBlock.style.display = 'none';
+            restMsg.style.display = 'none';
         } 
-        // Sprint: T5, CN (4, 0)
+        // T5, CN (4, 0)
         else if ([0,4].includes(day)) {
             gymBlock.style.display = 'none';
             sprintBlock.style.display = 'block';
+            restMsg.style.display = 'none';
         } else {
-            // Trường hợp dự phòng
             gymBlock.style.display = 'none';
             sprintBlock.style.display = 'none';
-        }
-    }
-
-    // --- TIME LOGIC ---
-    function checkAutoNewDay() {
-        const todayStr = new Date().toDateString(); 
-        if (data.lastDate !== todayStr) {
-            triggerNewDay(todayStr);
+            restMsg.style.display = 'block';
         }
     }
 
     function forceNextDay() {
-        if(confirm("XÁC NHẬN: Bỏ qua ngày hôm nay?")) {
+        if(confirm("XÁC NHẬN: Tua nhanh đến ngày mai?")) {
             data.day++;
+            data.offsetDays = (data.offsetDays || 0) + 1; // Tăng ngày ảo
             resetDailyStats();
-            data.lastDate = new Date().toDateString(); 
+            
+            // Cập nhật lastDate theo ngày ảo mới để khớp logic
+            data.lastDate = getEffectiveDate().toDateString();
+            
             unlockBMI();
             save();
-            alert("Đã chuyển sang Ngày " + data.day);
+            alert("Đã du hành đến Ngày " + data.day);
             location.reload();
         }
-    }
-
-    function triggerNewDay(dateStr) {
-        data.day++;
-        resetDailyStats();
-        data.lastDate = dateStr;
-        unlockBMI(); 
-        save();
-        alert("CHÀO MỪNG NGÀY MỚI! NGÀY THỨ " + data.day);
-        location.reload();
     }
 
     function resetDailyStats() {
@@ -418,7 +422,8 @@
         let compareText = "Dữ liệu khởi điểm.";
         if(data.weightHistory.length > 0) {
             const lastRecord = data.weightHistory[data.weightHistory.length-1];
-            if(lastRecord.day !== data.day) {
+            // So sánh với bản ghi gần nhất (khác ngày hiện tại)
+            if (lastRecord.day !== data.day) {
                 const diff = (w - lastRecord.weight).toFixed(1);
                 if(diff > 0) compareText = `▲ Tăng ${diff}kg`;
                 else if(diff < 0) compareText = `▼ Giảm ${Math.abs(diff)}kg`;
@@ -428,9 +433,9 @@
 
         const idx = data.weightHistory.findIndex(x => x.day === data.day);
         if(idx >= 0) {
-            data.weightHistory[idx] = { day: data.day, date: new Date().toLocaleDateString('vi-VN'), weight: w, compare: compareText };
+            data.weightHistory[idx] = { day: data.day, date: getEffectiveDate().toLocaleDateString('vi-VN'), weight: w, compare: compareText };
         } else {
-            data.weightHistory.push({ day: data.day, date: new Date().toLocaleDateString('vi-VN'), weight: w, compare: compareText });
+            data.weightHistory.push({ day: data.day, date: getEffectiveDate().toLocaleDateString('vi-VN'), weight: w, compare: compareText });
         }
         
         save();
@@ -484,7 +489,7 @@
         document.getElementById('bmi-result-area').style.display = 'none';
     }
 
-    // --- AI & OTHER LOGIC ---
+    // --- AI LOGIC ---
     function initAI() {
         if(data.apiKey) {
             document.getElementById('ai-interface').style.display = 'block';
@@ -594,6 +599,8 @@
             gymStatus.innerText = "CHƯA XONG";
             gymStatus.style.color = "#666";
         }
+        
+        updateScheduleUI();
         checkProgress();
     }
 
@@ -610,15 +617,12 @@
 
     function checkProgress() {
         let total = 0;
-        let maxPoints = 12; // Base tasks
+        let maxPoints = 12; 
         
-        // Adjust Max Points based on Schedule
-        const day = new Date().getDay();
+        const day = getEffectiveDate().getDay();
         const isGymDay = [1,2,3,5,6].includes(day);
         const isSprintDay = [0,4].includes(day);
         
-        // Base Tasks: Water, Milk, Supp, Carrot, Bike, Skin, Jaw, Mew, JP, School (10 items)
-        // Gym & Sprint are conditional
         let currentMax = 10;
         if (isGymDay) currentMax++;
         if (isSprintDay) currentMax++;
@@ -658,7 +662,7 @@
             rewardHTML = `<div style="color:#aaa;">PHẦN THƯỞNG NGẪU NHIÊN</div><div class="daily-text">🎁 ${rewardName}</div>`;
         }
 
-        data.history.push({ day: data.day, item: rewardName, date: new Date().toLocaleDateString('vi-VN') });
+        data.history.push({ day: data.day, item: rewardName, date: getEffectiveDate().toLocaleDateString('vi-VN') });
         save();
 
         document.getElementById('reward-display').innerHTML = rewardHTML;
@@ -705,7 +709,7 @@
     }
 
     function save() {
-        localStorage.setItem('shadowV10_Weekly', JSON.stringify(data));
+        localStorage.setItem('shadowV11_TimeTravel', JSON.stringify(data));
         renderUI();
     }
 
