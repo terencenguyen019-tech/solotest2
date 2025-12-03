@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHADOW SYSTEM - GROWTH</title>
+    <title>SHADOW SYSTEM - REALITY</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001f3f">
@@ -83,7 +83,7 @@
         .gym-list input { margin-right: 10px; transform: scale(1.3); }
         .progress-text { font-family: monospace; color: #888; font-size: 1rem; }
 
-        /* BMI SECTION (FIXED HEIGHT COMPARE) */
+        /* BMI SECTION */
         .bmi-box {
             background: rgba(0,0,0,0.4); padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #333;
             display: flex; flex-direction: column; gap: 10px;
@@ -100,7 +100,6 @@
         .calc-btn {
             width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 10px; font-weight: bold; margin-top: 5px;
         }
-        .calc-btn:disabled { background: #333; color: #666; }
         
         .bmi-result-area { border-top: 1px dashed #444; padding-top: 10px; margin-top: 5px; display: none; }
         .analysis-text { font-size: 0.95rem; color: #e0e6ff; line-height: 1.5; margin-bottom: 5px; }
@@ -126,15 +125,7 @@
         .loading-spinner { border: 4px solid #333; border-top: 4px solid var(--aura-glow); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* NEXT DAY BUTTON */
-        .next-day-btn {
-            width: 100%; margin-top: 30px; padding: 15px; font-size: 1rem;
-            background: #000; border: 2px solid var(--danger); color: var(--danger);
-            font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .next-day-btn:active { background: var(--danger); color: #000; }
-
+        /* REWARDS & HISTORY */
         .reward-box { border: 1px solid #555; padding: 20px; margin: 20px 0; background: rgba(255,255,255,0.05); border-radius: 8px;}
         .milestone-text { color: var(--warning); font-size: 1.6rem; text-transform: uppercase; text-shadow: 0 0 15px var(--warning); font-weight: bold; }
         .daily-text { color: var(--aura-glow); font-size: 1.3rem; font-weight: bold; }
@@ -224,7 +215,7 @@
                     <div id="bmi-advice" class="analysis-text" style="margin-top:8px; border-top:1px solid #333; padding-top:5px;"></div>
                 </div>
             </div>
-            <div style="font-size:0.8rem; color:#666;">Chỉ nhập 1 lần/ngày. Qua ngày sẽ mở khóa.</div>
+            <div style="font-size:0.8rem; color:#666;">Chỉ nhập 1 lần/ngày. Tự mở khóa khi qua ngày mới.</div>
         </div>
 
         <div class="task-item" style="flex-direction:column; align-items:flex-start;">
@@ -258,8 +249,6 @@
         <div class="task-item"><span>Mewing (Giữ lưỡi)</span> <button id="btn-mewing" onclick="toggleTask('mewing')">THỰC HIỆN</button></div>
         <div class="task-item"><span>Học Tiếng Nhật</span> <button id="btn-jp" onclick="toggleTask('jp')">THỰC HIỆN</button></div>
         <div class="task-item"><span>Học Phổ Thông</span> <button id="btn-school" onclick="toggleTask('school')">THỰC HIỆN</button></div>
-
-        <button class="next-day-btn" onclick="forceNextDay()">>> HACK: QUA NGÀY TIẾP THEO >></button>
     </div>
 </div>
 
@@ -309,12 +298,11 @@
     ];
 
     // --- DATA ---
-    let data = JSON.parse(localStorage.getItem('shadowV12_HeightFix')) || {
+    let data = JSON.parse(localStorage.getItem('shadowV13_Real')) || {
         day: 1, water: 0, milk: 0, supp: 0, tasks: {}, gymDone: false, 
         lastDate: new Date().toDateString(),
         rewardClaimed: false, history: [],
-        height: '', weightHistory: [], targetBMI: '', apiKey: '',
-        offsetDays: 0
+        height: '', weightHistory: [], targetBMI: '', apiKey: ''
     };
 
     function init() {
@@ -323,45 +311,31 @@
         initAI();
         
         setInterval(() => {
-            const now = getEffectiveDate();
+            const now = new Date();
             const options = { weekday: 'long', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
             document.getElementById('real-time-clock').innerText = now.toLocaleDateString('vi-VN', options);
+            
+            // Check qua ngày tự động (00:00)
+            if(now.getSeconds() === 0 && now.getHours() === 0 && now.getMinutes() === 0) checkAutoNewDay(); 
         }, 1000);
     }
 
-    // --- TIME TRAVEL LOGIC ---
-    function getEffectiveDate() {
-        const d = new Date();
-        d.setDate(d.getDate() + (data.offsetDays || 0));
-        return d;
-    }
-
-    function updateScheduleUI() {
-        const day = getEffectiveDate().getDay();
-        const gymBlock = document.getElementById('gym-block');
-        const sprintBlock = document.getElementById('sprint-block');
-        const restMsg = document.getElementById('rest-msg');
-        
-        if ([1,2,3,5,6].includes(day)) {
-            gymBlock.style.display = 'block'; sprintBlock.style.display = 'none'; restMsg.style.display = 'none';
-        } else if ([0,4].includes(day)) {
-            gymBlock.style.display = 'none'; sprintBlock.style.display = 'block'; restMsg.style.display = 'none';
-        } else {
-            gymBlock.style.display = 'none'; sprintBlock.style.display = 'none'; restMsg.style.display = 'block';
+    // --- TIME LOGIC ---
+    function checkAutoNewDay() {
+        const todayStr = new Date().toDateString(); 
+        if (data.lastDate !== todayStr) {
+            triggerNewDay(todayStr);
         }
     }
 
-    function forceNextDay() {
-        if(confirm("XÁC NHẬN: Tua nhanh đến ngày mai?")) {
-            data.day++;
-            data.offsetDays = (data.offsetDays || 0) + 1;
-            resetDailyStats();
-            data.lastDate = getEffectiveDate().toDateString();
-            unlockBMI();
-            save();
-            alert("Đã du hành đến Ngày " + data.day);
-            location.reload();
-        }
+    function triggerNewDay(dateStr) {
+        data.day++;
+        resetDailyStats();
+        data.lastDate = dateStr;
+        unlockBMI(); // Mở khóa BMI cho ngày mới
+        save();
+        alert("BÌNH MINH ĐÃ LÊN! CHÀO MỪNG NGÀY THỨ " + data.day);
+        location.reload();
     }
 
     function resetDailyStats() {
@@ -369,18 +343,18 @@
         data.tasks = {}; data.gymDone = false; data.rewardClaimed = false;
     }
 
-    // --- BMI LOGIC (UPDATED WITH HEIGHT COMPARE) ---
+    // --- BMI LOGIC ---
     function loadBMIState() {
         if(data.height) document.getElementById('height-input').value = data.height;
         if(data.targetBMI) document.getElementById('target-bmi-input').value = data.targetBMI;
         
-        // Check if saved today (using System Day)
-        const todayEntry = data.weightHistory.find(item => item.day === data.day);
+        // Kiểm tra xem hôm nay đã nhập chưa
+        const today = new Date().toDateString();
+        const todayEntry = data.weightHistory.find(item => item.date === today);
         
         if(todayEntry) {
             document.getElementById('weight-input').value = todayEntry.weight;
-            // Also update height input if changed in entry
-            document.getElementById('height-input').value = todayEntry.height;
+            document.getElementById('height-input').value = todayEntry.height; // Update height if changed
             showBMIResult(todayEntry.height, todayEntry.weight, data.targetBMI, todayEntry.compare);
             lockBMI();
         } else {
@@ -397,61 +371,40 @@
 
         data.height = h;
         data.targetBMI = t;
+        const today = new Date().toDateString();
         
-        // SO SÁNH (COMPARE LOGIC)
+        // SO SÁNH
         let compareText = "Dữ liệu khởi điểm.";
         if(data.weightHistory.length > 0) {
-            // Tìm entry gần nhất trước hôm nay
-            // Sort by day just in case
-            const sortedHistory = [...data.weightHistory].sort((a,b) => a.day - b.day);
+            // Tìm entry gần nhất KHÁC hôm nay
             let prevEntry = null;
-            
-            for(let i = sortedHistory.length - 1; i >= 0; i--) {
-                if(sortedHistory[i].day < data.day) {
-                    prevEntry = sortedHistory[i];
+            for(let i = data.weightHistory.length - 1; i >= 0; i--) {
+                if(data.weightHistory[i].date !== today) {
+                    prevEntry = data.weightHistory[i];
                     break;
                 }
             }
 
             if(prevEntry) {
-                // Compare Weight
                 const diffW = (w - prevEntry.weight).toFixed(1);
-                let wText = "";
-                if(diffW > 0) wText = `▲ Tăng ${diffW}kg`;
-                else if(diffW < 0) wText = `▼ Giảm ${Math.abs(diffW)}kg`;
-                else wText = "Cân nặng không đổi";
-
-                // Compare Height
                 const diffH = (h - prevEntry.height).toFixed(1);
-                let hText = "";
-                if(diffH > 0) hText = ` | ▲ CAO THÊM ${diffH}cm!`;
-                else if(diffH < 0) hText = ` | ▼ Thấp đi ${Math.abs(diffH)}cm`; // Rare
-                else hText = " | Chiều cao không đổi";
-
-                compareText = `${wText}${hText} so với Ngày ${prevEntry.day}`;
+                
+                let wText = diffW > 0 ? `▲ Tăng ${diffW}kg` : (diffW < 0 ? `▼ Giảm ${Math.abs(diffW)}kg` : "Cân nặng giữ nguyên");
+                let hText = diffH > 0 ? ` | ▲ Cao thêm ${diffH}cm` : "";
+                
+                compareText = `${wText}${hText} so với lần trước`;
             }
         }
 
-        // Save Entry (Overwrite if exists for today)
-        const idx = data.weightHistory.findIndex(x => x.day === data.day);
-        const newEntry = { 
-            day: data.day, 
-            date: getEffectiveDate().toLocaleDateString('vi-VN'), 
-            weight: w, 
-            height: h, 
-            compare: compareText 
-        };
-
-        if(idx >= 0) {
-            data.weightHistory[idx] = newEntry;
-        } else {
-            data.weightHistory.push(newEntry);
-        }
+        // Lưu
+        // Xóa entry cũ của hôm nay nếu có (để update)
+        data.weightHistory = data.weightHistory.filter(item => item.date !== today);
+        data.weightHistory.push({ date: today, weight: w, height: h, compare: compareText });
         
         save();
         showBMIResult(h, w, t, compareText);
         lockBMI();
-        alert("Đã lưu chỉ số!");
+        alert("Đã lưu chỉ số hôm nay!");
     }
 
     function showBMIResult(h, w, t, compareText) {
@@ -466,7 +419,6 @@
 
         const targetWeight = (t * heightM * heightM).toFixed(1);
         const diffWeight = (w - targetWeight).toFixed(1);
-        
         const targetHeightM = Math.sqrt(w / t);
         const targetHeightCm = (targetHeightM * 100).toFixed(1);
         const diffHeight = (targetHeightCm - h).toFixed(1);
@@ -493,7 +445,7 @@
     function unlockBMI() {
         document.getElementById('weight-input').disabled = false;
         document.getElementById('weight-input').value = ""; 
-        document.getElementById('height-input').disabled = false; // Allow height update
+        document.getElementById('height-input').disabled = false;
         document.getElementById('target-bmi-input').disabled = false;
         
         const btn = document.getElementById('btn-calc-bmi');
@@ -618,6 +570,21 @@
         checkProgress();
     }
 
+    function updateScheduleUI() {
+        const day = new Date().getDay();
+        const gymBlock = document.getElementById('gym-block');
+        const sprintBlock = document.getElementById('sprint-block');
+        const restMsg = document.getElementById('rest-msg');
+        
+        if ([1,2,3,5,6].includes(day)) {
+            gymBlock.style.display = 'block'; sprintBlock.style.display = 'none'; restMsg.style.display = 'none';
+        } else if ([0,4].includes(day)) {
+            gymBlock.style.display = 'none'; sprintBlock.style.display = 'block'; restMsg.style.display = 'none';
+        } else {
+            gymBlock.style.display = 'none'; sprintBlock.style.display = 'none'; restMsg.style.display = 'block';
+        }
+    }
+
     function updateBtn(id, key) {
         const btn = document.getElementById(id);
         if(data.tasks[key]) {
@@ -631,11 +598,9 @@
 
     function checkProgress() {
         let total = 0;
-        
-        const day = getEffectiveDate().getDay();
+        const day = new Date().getDay();
         const isGymDay = [1,2,3,5,6].includes(day);
         const isSprintDay = [0,4].includes(day);
-        
         let currentMax = 10;
         if (isGymDay) currentMax++;
         if (isSprintDay) currentMax++;
@@ -650,7 +615,6 @@
         if(data.tasks.mewing) total++;
         if(data.tasks.jp) total++;
         if(data.tasks.school) total++;
-        
         if(isGymDay && data.gymDone) total++;
         if(isSprintDay && data.tasks.sprint) total++;
 
@@ -675,7 +639,7 @@
             rewardHTML = `<div style="color:#aaa;">PHẦN THƯỞNG NGẪU NHIÊN</div><div class="daily-text">🎁 ${rewardName}</div>`;
         }
 
-        data.history.push({ day: data.day, item: rewardName, date: getEffectiveDate().toLocaleDateString('vi-VN') });
+        data.history.push({ day: data.day, item: rewardName, date: new Date().toLocaleDateString('vi-VN') });
         save();
 
         document.getElementById('reward-display').innerHTML = rewardHTML;
@@ -722,7 +686,7 @@
     }
 
     function save() {
-        localStorage.setItem('shadowV12_HeightFix', JSON.stringify(data));
+        localStorage.setItem('shadowV13_Real', JSON.stringify(data));
         renderUI();
     }
 
