@@ -29,45 +29,61 @@
         body {
             background-color: var(--bg-dark); color: var(--text-glow);
             font-family: 'Roboto Condensed', sans-serif;
-            margin: 0; padding: 15px;
+            margin: 0; padding: 20px;
             display: flex; justify-content: center; align-items: flex-start;
             min-height: 100vh;
+            /* Ảnh nền mờ ảo */
             background-image: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)), url('https://i.pinimg.com/originals/2a/12/35/2a1235476602353195253531353531.jpg');
             background-size: cover; background-attachment: fixed; background-position: center;
             touch-action: manipulation;
         }
 
         .system-window {
-            width: 100%; max-width: 650px; /* GIAO DIỆN RỘNG */
+            width: 100%; 
+            max-width: 650px; /* GIAO DIỆN RỘNG THEO YÊU CẦU */
             background: var(--panel-bg);
-            /* border-radius: 8px; */ /* Bỏ bo góc để hợp với họa tiết vuông */
-            overflow: visible; 
+            border-radius: 0px; /* Góc vuông để hợp với họa tiết */
+            overflow: visible; /* QUAN TRỌNG: Để họa tiết trồi ra ngoài không bị cắt */
             position: relative;
             box-shadow: 0 0 30px var(--aura-glow);
             border: 1px solid rgba(0, 168, 255, 0.3);
             animation: slideDown 0.8s ease-out;
             padding-bottom: 40px;
-            margin-top: 30px; margin-bottom: 30px;
+            margin-top: 40px; margin-bottom: 30px; /* Tăng margin top để họa tiết không bị cắt trên đầu */
         }
 
-        /* --- HỌA TIẾT 4 GÓC --- */
+        /* --- CẤU HÌNH HỌA TIẾT GÓC (QUAN TRỌNG) --- */
         .corner-deco {
             position: absolute;
-            width: 120px; height: 120px;
-            pointer-events: none; z-index: 999;
-            opacity: 0.9;
-            filter: drop-shadow(0 0 5px var(--aura-glow)); /* Hiệu ứng phát sáng cho họa tiết */
+            width: 130px;  /* Kích thước ảnh */
+            height: 130px;
+            pointer-events: none; /* Bấm xuyên qua */
+            z-index: 999;
+            
+            /* BỘ LỌC MÀU: Biến ảnh đen thành Trắng + Phát sáng Xanh */
+            /* Nếu ảnh của bạn đã là màu trắng/xanh thì xóa đoạn filter này đi */
+            filter: invert(100%) drop-shadow(0 0 5px var(--aura-glow));
         }
-        .corner-tl { top: -12px; left: -12px; }
-        .corner-tr { top: -12px; right: -12px; transform: scaleX(-1); }
-        .corner-bl { bottom: -12px; left: -12px; transform: scaleY(-1); }
-        .corner-br { bottom: -12px; right: -12px; transform: scale(-1); }
+
+        /* Căn chỉnh vị trí từng góc (Bo sát vào viền) */
+        /* Nếu họa tiết bị lọt vào trong, hãy giảm số px (vd: -20px) */
+        /* Nếu họa tiết bị bay ra xa quá, hãy tăng số px (vd: -5px) */
+        .corner-tl { top: -18px; left: -18px; } 
+        .corner-tr { top: -18px; right: -18px; transform: scaleX(-1); } /* Lật ngang */
+        .corner-bl { bottom: -18px; left: -18px; transform: scaleY(-1); } /* Lật dọc */
+        .corner-br { bottom: -18px; right: -18px; transform: scale(-1); } /* Lật cả hai */
+        
         .corner-deco img { width: 100%; height: 100%; object-fit: contain; }
 
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* HEADER */
-        .header { background: linear-gradient(90deg, transparent, rgba(0, 86, 179, 0.3), transparent); padding: 35px 20px 20px 20px; text-align: center; border-bottom: 1px solid rgba(0, 168, 255, 0.3); }
+        /* HEADER (Đã chỉnh Padding để không bị che chữ) */
+        .header { 
+            background: linear-gradient(90deg, transparent, rgba(0, 86, 179, 0.3), transparent); 
+            padding: 50px 20px 20px 20px; /* Tăng padding-top lên 50px để tránh họa tiết */
+            text-align: center; 
+            border-bottom: 1px solid rgba(0, 168, 255, 0.3); 
+        }
         .quest-title { color: #fff; font-family: 'Oswald', sans-serif; font-size: 2.2rem; text-transform: uppercase; letter-spacing: 3px; margin: 0; text-shadow: 0 0 20px var(--aura-glow); }
         
         .rank-display { text-align: center; padding: 20px; background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -102,7 +118,7 @@
         .gym-list input { margin-right: 12px; transform: scale(1.4); }
         .progress-text { font-family: monospace; color: #888; font-size: 1.1rem; }
 
-        /* BMI SECTION (FINAL) */
+        /* BMI SECTION */
         .bmi-box {
             background: rgba(0,0,0,0.4); padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #333;
             display: flex; flex-direction: column; gap: 15px;
@@ -114,7 +130,7 @@
         .bmi-input {
             background: #111; border: 1px solid #555; color: #fff; padding: 10px; width: 100%; text-align: center; border-radius: 4px; font-size: 18px;
         }
-        .bmi-input:disabled { background: #222; color: #666; border-color: #333; }
+        .bmi-input:disabled { background: #1a1a1a; color: #aaa; border-color: #444; }
         
         .calc-btn {
             width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 12px; font-weight: bold; margin-top: 5px; font-size: 1.1rem;
@@ -158,6 +174,9 @@
 
         .schedule-info { color: var(--aura-glow); font-size: 0.9rem; margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; }
         .rest-day-text { color: #666; font-style: italic; padding: 20px; text-align: center; border: 1px dashed #444; border-radius: 5px; font-size: 1.1rem; }
+
+        .next-day-btn { width: 100%; margin-top: 30px; padding: 15px; font-size: 1.1rem; background: #000; border: 2px solid var(--danger); color: var(--danger); font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
+        .next-day-btn:active { background: var(--danger); color: #000; }
 
     </style>
 </head>
@@ -324,7 +343,7 @@
     ];
 
     // --- DATA ---
-    let data = JSON.parse(localStorage.getItem('shadowFinalUltimate')) || {
+    let data = JSON.parse(localStorage.getItem('shadowV15_CustomCorner')) || {
         day: 1, water: 0, milk: 0, supp: 0, tasks: {}, gymDone: false, 
         lastDate: new Date().toDateString(),
         rewardClaimed: false, history: [],
@@ -345,7 +364,7 @@
         }, 1000);
     }
 
-    // --- TIME & SCHEDULE LOGIC ---
+    // --- TIME LOGIC ---
     function checkAutoNewDay() {
         const todayStr = new Date().toDateString(); 
         if (data.lastDate !== todayStr) {
@@ -355,8 +374,7 @@
 
     function triggerNewDay(dateStr) {
         data.day++;
-        data.water = 0; data.milk = 0; data.supp = 0;
-        data.tasks = {}; data.gymDone = false; data.rewardClaimed = false;
+        resetDailyStats();
         data.lastDate = dateStr;
         unlockBMI(); 
         save();
@@ -364,19 +382,9 @@
         location.reload();
     }
 
-    function updateScheduleUI() {
-        const day = new Date().getDay();
-        const gymBlock = document.getElementById('gym-block');
-        const sprintBlock = document.getElementById('sprint-block');
-        const restMsg = document.getElementById('rest-msg');
-        
-        if ([1,2,3,5,6].includes(day)) {
-            gymBlock.style.display = 'block'; sprintBlock.style.display = 'none'; restMsg.style.display = 'none';
-        } else if ([0,4].includes(day)) {
-            gymBlock.style.display = 'none'; sprintBlock.style.display = 'block'; restMsg.style.display = 'none';
-        } else {
-            gymBlock.style.display = 'none'; sprintBlock.style.display = 'none'; restMsg.style.display = 'block';
-        }
+    function resetDailyStats() {
+        data.water = 0; data.milk = 0; data.supp = 0;
+        data.tasks = {}; data.gymDone = false; data.rewardClaimed = false;
     }
 
     // --- BMI LOGIC ---
@@ -384,8 +392,7 @@
         if(data.height) document.getElementById('height-input').value = data.height;
         if(data.targetBMI) document.getElementById('target-bmi-input').value = data.targetBMI;
         
-        const today = new Date().toDateString();
-        const todayEntry = data.weightHistory.find(item => item.date === today);
+        const todayEntry = data.weightHistory.find(item => item.day === data.day);
         
         if(todayEntry) {
             document.getElementById('weight-input').value = todayEntry.weight;
@@ -410,25 +417,30 @@
         
         let compareText = "Dữ liệu khởi điểm.";
         if(data.weightHistory.length > 0) {
-            const sorted = [...data.weightHistory].sort((a,b) => new Date(a.date) - new Date(b.date));
-            const prevEntry = sorted.find(item => item.date !== today);
+            const sorted = [...data.weightHistory].sort((a,b) => a.day - b.day);
+            let prevEntry = null;
+            for(let i = sorted.length - 1; i >= 0; i--) {
+                if(sorted[i].day < data.day) {
+                    prevEntry = sorted[i];
+                    break;
+                }
+            }
 
             if(prevEntry) {
                 const diffW = (w - prevEntry.weight).toFixed(1);
                 const diffH = (h - prevEntry.height).toFixed(1);
-                
-                let wText = diffW > 0 ? `▲ Tăng ${diffW}kg` : (diffW < 0 ? `▼ Giảm ${Math.abs(diffW)}kg` : "Cân nặng giữ nguyên");
-                let hText = diffH > 0 ? ` | ▲ Cao thêm ${diffH}cm` : "";
-                
-                compareText = `${wText}${hText} so với lần trước`;
+                let wText = diffW > 0 ? `▲ Tăng ${diffW}kg` : (diffW < 0 ? `▼ Giảm ${Math.abs(diffW)}kg` : "Cân nặng không đổi");
+                let hText = diffH > 0 ? ` | ▲ Cao thêm ${diffH}cm!` : "";
+                compareText = `${wText}${hText} so với Ngày ${prevEntry.day}`;
             }
         }
 
-        // Save
-        data.weightHistory = data.weightHistory.filter(item => item.date !== today);
-        data.weightHistory.push({ date: today, weight: w, height: h, compare: compareText });
+        const idx = data.weightHistory.findIndex(x => x.day === data.day);
+        const entry = { day: data.day, date: new Date().toLocaleDateString('vi-VN'), weight: w, height: h, compare: compareText };
+        if(idx >= 0) data.weightHistory[idx] = entry;
+        else data.weightHistory.push(entry);
+        
         save();
-
         showBMIResult(h, w, t, compareText);
         lockBMI();
         alert("Đã lưu chỉ số!");
@@ -444,10 +456,8 @@
         document.getElementById('bmi-status').innerText = status;
         document.getElementById('bmi-comparison').innerText = compareText;
 
-        // Target Logic
         const targetWeight = (t * heightM * heightM).toFixed(1);
         const diffWeight = (w - targetWeight).toFixed(1);
-        
         const targetHeightM = Math.sqrt(w / t);
         const targetHeightCm = (targetHeightM * 100).toFixed(1);
         const diffHeight = (targetHeightCm - h).toFixed(1);
@@ -598,6 +608,21 @@
         checkProgress();
     }
 
+    function updateScheduleUI() {
+        const day = new Date().getDay();
+        const gymBlock = document.getElementById('gym-block');
+        const sprintBlock = document.getElementById('sprint-block');
+        const restMsg = document.getElementById('rest-msg');
+        
+        if ([1,2,3,5,6].includes(day)) {
+            gymBlock.style.display = 'block'; sprintBlock.style.display = 'none'; restMsg.style.display = 'none';
+        } else if ([0,4].includes(day)) {
+            gymBlock.style.display = 'none'; sprintBlock.style.display = 'block'; restMsg.style.display = 'none';
+        } else {
+            gymBlock.style.display = 'none'; sprintBlock.style.display = 'none'; restMsg.style.display = 'block';
+        }
+    }
+
     function updateBtn(id, key) {
         const btn = document.getElementById(id);
         if(data.tasks[key]) {
@@ -614,7 +639,6 @@
         const day = new Date().getDay();
         const isGymDay = [1,2,3,5,6].includes(day);
         const isSprintDay = [0,4].includes(day);
-        
         let currentMax = 10;
         if (isGymDay) currentMax++;
         if (isSprintDay) currentMax++;
@@ -700,7 +724,7 @@
     }
 
     function save() {
-        localStorage.setItem('shadowFinalUltimate', JSON.stringify(data));
+        localStorage.setItem('shadowV15_CustomCorner', JSON.stringify(data));
         renderUI();
     }
 
