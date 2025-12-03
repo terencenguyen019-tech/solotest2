@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHADOW SYSTEM - REALITY</title>
+    <title>SHADOW LORD SYSTEM</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001f3f">
@@ -46,6 +46,29 @@
             animation: slideDown 0.8s ease-out;
             padding-bottom: 30px;
         }
+
+        /* Họa tiết 4 góc */
+        .corner-deco {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .corner-tl { top: 0; left: 0; }
+        .corner-tr { top: 0; right: 0; transform: scaleX(-1); }
+        .corner-bl { bottom: 0; left: 0; transform: scaleY(-1); }
+        .corner-br { bottom: 0; right: 0; transform: scale(-1); }
+
+        .corner-deco img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Crop ảnh gốc để lấy họa tiết góc */
+            object-position: top left;
+        }
+
 
         @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
@@ -144,8 +167,13 @@
 <body>
 
 <div class="system-window">
+    <div class="corner-deco corner-tl"><img src="image_6.png" alt="corner"></div>
+    <div class="corner-deco corner-tr"><img src="image_6.png" alt="corner"></div>
+    <div class="corner-deco corner-bl"><img src="image_6.png" alt="corner"></div>
+    <div class="corner-deco corner-br"><img src="image_6.png" alt="corner"></div>
+
     <div class="header">
-        <h1 class="quest-title">SHADOW SYSTEM</h1>
+        <h1 class="quest-title">SHADOW LORD SYSTEM</h1>
         <div class="clock-display" id="real-time-clock">Loading Time...</div>
     </div>
 
