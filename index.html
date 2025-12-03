@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SHADOW SYSTEM - PERFECT BMI</title>
+    <title>SHADOW SYSTEM - WEEKLY</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#001f3f">
@@ -13,7 +13,6 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
     <style>
-        /* --- GIAO DIỆN --- */
         :root {
             --bg-dark: #050810;
             --panel-bg: linear-gradient(160deg, #0b121e 0%, #120c1f 100%);
@@ -55,7 +54,12 @@
         
         .rank-display { text-align: center; padding: 15px; background: rgba(0,0,0,0.6); border-bottom: 1px solid rgba(255,255,255,0.1); }
         .rank-text { font-size: 1.5rem; color: var(--warning); font-weight: bold; text-shadow: 0 0 10px var(--warning); }
-        .clock-display { font-family: monospace; color: #888; font-size: 0.9rem; margin-top: 5px; }
+        
+        /* ĐỒNG HỒ MỚI */
+        .clock-display { 
+            font-family: 'Oswald', sans-serif; color: var(--aura-glow); font-size: 1rem; margin-top: 5px; 
+            letter-spacing: 1px; text-transform: uppercase;
+        }
 
         .content { padding: 15px; max-height: 70vh; overflow-y: auto; }
 
@@ -84,7 +88,7 @@
         .gym-list input { margin-right: 10px; transform: scale(1.3); }
         .progress-text { font-family: monospace; color: #888; font-size: 1rem; }
 
-        /* BMI SECTION (FIXED) */
+        /* BMI SECTION */
         .bmi-box {
             background: rgba(0,0,0,0.4); padding: 12px; border-radius: 5px; margin-bottom: 10px; border: 1px solid #333;
             display: flex; flex-direction: column; gap: 10px;
@@ -97,11 +101,7 @@
             background: #111; border: 1px solid #555; color: #fff; padding: 8px; width: 100%; text-align: center; border-radius: 4px; font-size: 16px;
         }
         .bmi-input:disabled { background: #222; color: #666; border-color: #333; }
-        
-        .calc-btn {
-            width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 10px; font-weight: bold; margin-top: 5px;
-        }
-        
+        .calc-btn { width: 100%; background: var(--shadow-purple); color: #fff; border: none; padding: 10px; font-weight: bold; margin-top: 5px; }
         .bmi-result-area { border-top: 1px dashed #444; padding-top: 10px; margin-top: 5px; display: none; }
         .analysis-text { font-size: 0.95rem; color: #e0e6ff; line-height: 1.5; margin-bottom: 5px; }
         .hl { color: var(--warning); font-weight: bold; }
@@ -126,15 +126,7 @@
         .loading-spinner { border: 4px solid #333; border-top: 4px solid var(--aura-glow); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* NEXT DAY BUTTON */
-        .next-day-btn {
-            width: 100%; margin-top: 30px; padding: 15px; font-size: 1rem;
-            background: #000; border: 2px solid var(--danger); color: var(--danger);
-            font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px;
-            cursor: pointer; transition: 0.3s;
-        }
-        .next-day-btn:active { background: var(--danger); color: #000; }
-
+        /* REWARDS & HISTORY */
         .reward-box { border: 1px solid #555; padding: 20px; margin: 20px 0; background: rgba(255,255,255,0.05); border-radius: 8px;}
         .milestone-text { color: var(--warning); font-size: 1.6rem; text-transform: uppercase; text-shadow: 0 0 15px var(--warning); font-weight: bold; }
         .daily-text { color: var(--aura-glow); font-size: 1.3rem; font-weight: bold; }
@@ -144,6 +136,18 @@
         .history-item { padding: 10px; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
         .history-day { color: var(--warning); font-weight: bold; font-size: 0.9rem; }
         .history-reward { color: #fff; }
+
+        .next-day-btn {
+            width: 100%; margin-top: 30px; padding: 15px; font-size: 1rem;
+            background: #000; border: 2px solid var(--danger); color: var(--danger);
+            font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s;
+        }
+        .next-day-btn:active { background: var(--danger); color: #000; }
+
+        /* LỊCH TRÌNH */
+        .schedule-info { color: var(--aura-glow); font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        .rest-day-text { color: #666; font-style: italic; padding: 10px; text-align: center; border: 1px dashed #444; border-radius: 5px;}
 
     </style>
 </head>
@@ -212,31 +216,39 @@
                         <input type="number" id="target-bmi-input" class="bmi-input" placeholder="VD: 22">
                     </div>
                 </div>
-                
                 <button id="btn-calc-bmi" class="calc-btn" onclick="calculateBMI()">TÍNH TOÁN VÀ LƯU</button>
-
                 <div id="bmi-result-area" class="bmi-result-area">
                     <div class="analysis-text">BMI Hiện tại: <span id="bmi-val" class="hl">--</span> (<span id="bmi-status">--</span>)</div>
-                    <div id="bmi-comparison" class="analysis-text" style="font-style:italic; color:#aaa;"></div>
+                    <div id="bmi-comparison" class="analysis-text" style="font-style:italic; color:#aaa; margin-bottom:8px;"></div>
                     <div id="bmi-advice" class="analysis-text" style="margin-top:8px; border-top:1px solid #333; padding-top:5px;"></div>
                 </div>
             </div>
-            <div style="font-size:0.8rem; color:#666;">Mỗi ngày chỉ nhập 1 lần.</div>
         </div>
 
         <div class="task-item" style="flex-direction:column; align-items:flex-start;">
-            <div style="font-weight:bold; color:var(--aura-glow); margin-bottom:10px;">GYM (3 Tập - 1 Nghỉ)</div>
-            <div class="gym-list" style="width:100%;">
-                <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 50 Bicep Curls</label>
-                <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Tricep Dips</label>
-                <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 50 Squats</label>
-                <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Incline Press</label>
-                <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Lunges</label>
+            <div style="font-weight:bold; color:var(--aura-glow); margin-bottom:10px;">LỊCH TRÌNH HÔM NAY</div>
+            
+            <div id="gym-block" style="width:100%; display:none;">
+                <div class="schedule-info">THỨ 2,3,4,6,7: TẬP GYM</div>
+                <div class="gym-list">
+                    <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 50 Bicep Curls</label>
+                    <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Tricep Dips</label>
+                    <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 50 Squats</label>
+                    <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Incline Press</label>
+                    <label><input type="checkbox" onchange="checkGym()" class="gym-check"> 25 Lunges</label>
+                </div>
+                <div id="gym-status" style="width:100%; text-align:right; font-size:0.9rem; color:#666; margin-top:5px;">CHƯA XONG</div>
             </div>
-            <div id="gym-status" style="width:100%; text-align:right; font-size:0.9rem; color:#666; margin-top:5px;">CHƯA XONG</div>
+
+            <div id="sprint-block" style="width:100%; display:none;">
+                <div class="schedule-info">THỨ 5, CN: CHẠY NƯỚC RÚT</div>
+                <button id="btn-sprint" style="width:100%; margin-top:10px;" onclick="toggleTask('sprint')">THỰC HIỆN</button>
+            </div>
+
+            <div id="rest-msg" class="rest-day-text" style="display:none;">HÔM NAY NGHỈ NGƠI HOÀN TOÀN</div>
         </div>
+
         <div class="task-item"><span>Đạp xe mỗi ngày</span><button id="btn-bike" onclick="toggleTask('bike')">THỰC HIỆN</button></div>
-        <div class="task-item"><span>Chạy nước rút (T2,4,CN)</span><button id="btn-sprint" onclick="toggleTask('sprint')">THỰC HIỆN</button></div>
 
         <div class="section-title">III. PHÁT TRIỂN & HỌC TẬP</div>
         <div class="task-item"><span>Skincare (2 lần)</span> <button id="btn-skin" onclick="toggleTask('skin')">XONG</button></div>
@@ -294,8 +306,8 @@
         "Học giặt đồ", "Học rửa chén", "Viết sách", "Chat thành người thành công", "Mua đồ <1tr", "Bóng bàn", "Bi lắc", "Phi tiêu"
     ];
 
-    // --- DATA STORE ---
-    let data = JSON.parse(localStorage.getItem('shadowV8_Fixed')) || {
+    // --- DATA ---
+    let data = JSON.parse(localStorage.getItem('shadowV10_Weekly')) || {
         day: 1, water: 0, milk: 0, supp: 0, tasks: {}, gymDone: false, 
         lastDate: new Date().toDateString(),
         rewardClaimed: false, history: [],
@@ -305,14 +317,41 @@
     function init() {
         checkAutoNewDay();
         renderUI();
+        updateScheduleUI(); // Cập nhật lịch theo thứ
         loadBMIState();
         initAI();
         
         setInterval(() => {
             const now = new Date();
-            document.getElementById('real-time-clock').innerText = now.toLocaleTimeString('vi-VN') + " - " + now.toLocaleDateString('vi-VN');
+            // Format thứ/ngày/tháng/năm
+            const options = { weekday: 'long', hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' };
+            document.getElementById('real-time-clock').innerText = now.toLocaleDateString('vi-VN', options);
+            
             if(now.getSeconds() === 0 && now.getHours() === 0 && now.getMinutes() === 0) checkAutoNewDay(); 
         }, 1000);
+    }
+
+    // --- SCHEDULE LOGIC (NEW) ---
+    function updateScheduleUI() {
+        const day = new Date().getDay(); // 0=CN, 1=T2, ... 6=T7
+        
+        const gymBlock = document.getElementById('gym-block');
+        const sprintBlock = document.getElementById('sprint-block');
+        
+        // Gym: T2, T3, T4, T6, T7 (1,2,3,5,6)
+        if ([1,2,3,5,6].includes(day)) {
+            gymBlock.style.display = 'block';
+            sprintBlock.style.display = 'none';
+        } 
+        // Sprint: T5, CN (4, 0)
+        else if ([0,4].includes(day)) {
+            gymBlock.style.display = 'none';
+            sprintBlock.style.display = 'block';
+        } else {
+            // Trường hợp dự phòng
+            gymBlock.style.display = 'none';
+            sprintBlock.style.display = 'none';
+        }
     }
 
     // --- TIME LOGIC ---
@@ -328,8 +367,7 @@
             data.day++;
             resetDailyStats();
             data.lastDate = new Date().toDateString(); 
-            // Reset BMI lock để ngày mới được nhập tiếp
-            // Lưu ý: data.weightHistory chỉ lưu 1 bản ghi/ngày hệ thống
+            unlockBMI();
             save();
             alert("Đã chuyển sang Ngày " + data.day);
             location.reload();
@@ -340,8 +378,9 @@
         data.day++;
         resetDailyStats();
         data.lastDate = dateStr;
+        unlockBMI(); 
         save();
-        alert("BÌNH MINH ĐÃ LÊN! CHÀO MỪNG NGÀY THỨ " + data.day);
+        alert("CHÀO MỪNG NGÀY MỚI! NGÀY THỨ " + data.day);
         location.reload();
     }
 
@@ -350,14 +389,11 @@
         data.tasks = {}; data.gymDone = false; data.rewardClaimed = false;
     }
 
-    // --- BMI LOGIC (FIXED) ---
+    // --- BMI LOGIC ---
     function loadBMIState() {
         if(data.height) document.getElementById('height-input').value = data.height;
         if(data.targetBMI) document.getElementById('target-bmi-input').value = data.targetBMI;
         
-        // Logic mới: Kiểm tra xem TRONG data.weightHistory CÓ entry nào khớp với data.day (Ngày Hệ Thống) không
-        // Nếu có -> Khóa (Đã nhập hôm nay rồi)
-        // Nếu không -> Mở khóa (Chưa nhập)
         const todayEntry = data.weightHistory.find(item => item.day === data.day);
         
         if(todayEntry) {
@@ -379,29 +415,28 @@
         data.height = h;
         data.targetBMI = t;
         
-        // So sánh với lần nhập gần nhất
         let compareText = "Dữ liệu khởi điểm.";
         if(data.weightHistory.length > 0) {
             const lastRecord = data.weightHistory[data.weightHistory.length-1];
-            // So sánh với bản ghi cuối cùng (khác ngày hiện tại)
-            const diff = (w - lastRecord.weight).toFixed(1);
-            if(diff > 0) compareText = `▲ Tăng ${diff}kg`;
-            else if(diff < 0) compareText = `▼ Giảm ${Math.abs(diff)}kg`;
-            else compareText = "Giữ nguyên";
+            if(lastRecord.day !== data.day) {
+                const diff = (w - lastRecord.weight).toFixed(1);
+                if(diff > 0) compareText = `▲ Tăng ${diff}kg`;
+                else if(diff < 0) compareText = `▼ Giảm ${Math.abs(diff)}kg`;
+                else compareText = "Giữ nguyên";
+            }
         }
 
-        // Lưu bản ghi MỚI gắn với data.day hiện tại
-        data.weightHistory.push({ 
-            day: data.day, // Quan trọng: Lưu theo ngày hệ thống
-            date: new Date().toLocaleDateString('vi-VN'), // Lưu thêm ngày thực để tham khảo
-            weight: w, 
-            compare: compareText 
-        });
+        const idx = data.weightHistory.findIndex(x => x.day === data.day);
+        if(idx >= 0) {
+            data.weightHistory[idx] = { day: data.day, date: new Date().toLocaleDateString('vi-VN'), weight: w, compare: compareText };
+        } else {
+            data.weightHistory.push({ day: data.day, date: new Date().toLocaleDateString('vi-VN'), weight: w, compare: compareText });
+        }
         
         save();
         showBMIResult(h, w, t, compareText);
         lockBMI();
-        alert("Đã lưu chỉ số Ngày " + data.day + "!");
+        alert("Đã lưu chỉ số!");
     }
 
     function showBMIResult(h, w, t, compareText) {
@@ -449,7 +484,7 @@
         document.getElementById('bmi-result-area').style.display = 'none';
     }
 
-    // --- AI LOGIC (SECURE) ---
+    // --- AI & OTHER LOGIC ---
     function initAI() {
         if(data.apiKey) {
             document.getElementById('ai-interface').style.display = 'block';
@@ -575,24 +610,37 @@
 
     function checkProgress() {
         let total = 0;
+        let maxPoints = 12; // Base tasks
+        
+        // Adjust Max Points based on Schedule
+        const day = new Date().getDay();
+        const isGymDay = [1,2,3,5,6].includes(day);
+        const isSprintDay = [0,4].includes(day);
+        
+        // Base Tasks: Water, Milk, Supp, Carrot, Bike, Skin, Jaw, Mew, JP, School (10 items)
+        // Gym & Sprint are conditional
+        let currentMax = 10;
+        if (isGymDay) currentMax++;
+        if (isSprintDay) currentMax++;
+
         if(data.water >= 6) total++;
         if(data.milk >= 1) total++;
         if(data.supp >= 2) total++;
-        if(data.gymDone) total++;
         if(data.tasks.carrot) total++;
         if(data.tasks.bike) total++;
-        if(data.tasks.sprint) total++;
         if(data.tasks.skin) total++;
         if(data.tasks.jaw) total++;
         if(data.tasks.mewing) total++;
         if(data.tasks.jp) total++;
         if(data.tasks.school) total++;
+        
+        if(isGymDay && data.gymDone) total++;
+        if(isSprintDay && data.tasks.sprint) total++;
 
-        const maxPoints = 12; 
-        const percent = (total / maxPoints) * 100;
+        const percent = (total / currentMax) * 100;
         document.getElementById('daily-progress-bar').style.width = percent + "%";
 
-        if(total === maxPoints && !data.rewardClaimed) {
+        if(total === currentMax && !data.rewardClaimed) {
             triggerReward();
         }
     }
@@ -657,7 +705,7 @@
     }
 
     function save() {
-        localStorage.setItem('shadowV8_Fixed', JSON.stringify(data));
+        localStorage.setItem('shadowV10_Weekly', JSON.stringify(data));
         renderUI();
     }
 
